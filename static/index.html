@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deva Google Assistant AI Platform</title>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --g-blue: #4285F4;
+            --g-red: #EA4335;
+            --g-yellow: #FBBC05;
+            --g-green: #34A853;
+            --bg-dark: #0f1015;
+            --card-dark: #181920;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f1f3f4;
+            --text-sub: #9aa0a6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Google Sans', 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Navigation */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(24, 25, 32, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .assistant-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .dot-blue { background: var(--g-blue); animation-delay: 0s; }
+        .dot-red { background: var(--g-red); animation-delay: 0.2s; }
+        .dot-yellow { background: var(--g-yellow); animation-delay: 0.4s; }
+        .dot-green { background: var(--g-green); animation-delay: 0.6s; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a0a5b5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+
+        /* Auto Detect Language Badge */
+        .auto-lang-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(138, 180, 248, 0.1);
+            border: 1px solid rgba(138, 180, 248, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #8ab4f8;
+            font-weight: 500;
+        }
+
+        /* Frequency Panel Toggle Button */
+        .toggle-freq-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .toggle-freq-btn:hover, .toggle-freq-btn.active {
+            background: var(--g-blue);
+            color: white;
+            border-color: var(--g-blue);
+            box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
+        }
+
+        .open-deva-btn {
+            background: linear-gradient(135deg, #EA4335, #FBBC05);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(234, 67, 53, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .open-deva-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Speaker Voice Switcher Pill */
+        .pill-selector {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 30px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .pill-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .pill-btn.active {
+            background: var(--g-blue);
+            color: white;
+            box-shadow: 0 2px 10px rgba(66, 133, 244, 0.4);
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #8ab4f8;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #34A853;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #34A853;
+        }
+
+        /* Main Workspace Container */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 8rem 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Collapsible Voice Frequency Tone Control Panel */
+        .freq-panel {
+            background: var(--card-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .freq-panel.open {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .freq-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-main);
+        }
+
+        .freq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        .slider-label span.val {
+            color: var(--g-blue);
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--g-blue);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(66, 133, 244, 0.6);
+        }
+
+        .presets-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .preset-chip {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            color: var(--text-sub);
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-chip:hover {
+            background: rgba(66, 133, 244, 0.2);
+            color: #8ab4f8;
+            border-color: rgba(66, 133, 244, 0.4);
+        }
+
+        /* Chat History Box */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .message-row {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .message-row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-row.assistant {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .avatar-user {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .avatar-assistant {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+        }
+
+        .bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .message-row.user .bubble {
+            background: #2b3040;
+            color: #ffffff;
+            border-top-right-radius: 4px;
+        }
+
+        .message-row.assistant .bubble {
+            background: var(--card-dark);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            border-top-left-radius: 4px;
+        }
+
+        .voice-badge-tag {
+            font-size: 0.75rem;
+            opacity: 0.85;
+            margin-bottom: 4px;
+            display: block;
+            color: var(--g-blue);
+        }
+
+        .secret-badge-tag {
+            font-size: 0.75rem;
+            color: #FBBC05;
+            background: rgba(251, 188, 5, 0.15);
+            border: 1px solid rgba(251, 188, 5, 0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Voice Assistant Visualizer & Controls */
+        .voice-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-dark);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 2rem 1.5rem;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .orb-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .mic-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e2029 0%, #2b2e3c 100%);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .mic-btn:hover {
+            transform: scale(1.08);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .mic-btn.recording {
+            background: linear-gradient(135deg, #EA4335, #d93025);
+            animation: pulse-red 1.2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(234, 67, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0); }
+        }
+
+        .g-ring {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            background: conic-gradient(var(--g-blue), var(--g-red), var(--g-yellow), var(--g-green), var(--g-blue));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            animation: rotateGlow 3s linear infinite;
+            filter: blur(8px);
+            z-index: 1;
+        }
+
+        .orb-wrapper.active .g-ring {
+            opacity: 1;
+        }
+
+        @keyframes rotateGlow {
+            100% { transform: rotate(360deg); }
+        }
+
+        .wave-visualizer {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 35px;
+            margin-bottom: 1rem;
+        }
+
+        .bar {
+            width: 4px;
+            height: 8px;
+            background: var(--text-sub);
+            border-radius: 4px;
+            transition: height 0.1s ease;
+        }
+
+        .recording .bar {
+            background: var(--g-blue);
+            animation: soundWave 0.8s ease-in-out infinite alternate;
+        }
+
+        .recording .bar:nth-child(2) { animation-delay: 0.1s; background: var(--g-red); }
+        .recording .bar:nth-child(3) { animation-delay: 0.2s; background: var(--g-yellow); }
+        .recording .bar:nth-child(4) { animation-delay: 0.3s; background: var(--g-green); }
+        .recording .bar:nth-child(5) { animation-delay: 0.4s; background: var(--g-blue); }
+
+        @keyframes soundWave {
+            0% { height: 6px; }
+            100% { height: 32px; }
+        }
+
+        .assistant-status {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .input-bar {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .input-bar input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-bar input:focus {
+            border-color: var(--g-blue);
+        }
+
+        .send-btn {
+            background: var(--g-blue);
+            color: white;
+            border: none;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* FLOATING GOOGLE ASSISTANT POP-UP WIDGET */
+        .widget-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #1e2029;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .widget-fab:hover {
+            transform: scale(1.1);
+        }
+
+        .widget-popup {
+            position: fixed;
+            bottom: 105px;
+            right: 30px;
+            width: 380px;
+            max-width: calc(100vw - 40px);
+            background: #181920;
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .widget-popup.open {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .popup-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .popup-body {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .popup-transcript {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            text-align: center;
+            margin-top: 1rem;
+            min-height: 48px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Header -->
+    <header>
+        <div class="logo-group">
+            <div class="assistant-dots">
+                <div class="dot dot-blue"></div>
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
+            </div>
+            <div class="logo-title">Deva Voice Assistant</div>
+        </div>
+
+        <div class="header-controls">
+            <!-- Open Deva Trigger Button -->
+            <button class="open-deva-btn" onclick="triggerOpenDeva()">
+                <i class="fa-solid fa-power-off"></i> Open Deva
+            </button>
+
+
+            <!-- Auto-Detect Language Badge -->
+            <div class="auto-lang-badge" title="Automatically detects English, Hindi, and Hinglish speech">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Detect Language
+            </div>
+
+            <!-- Voice Frequency Panel Toggle Button -->
+            <button class="toggle-freq-btn" id="toggleFreqBtn" onclick="toggleFreqPanel()">
+                <i class="fa-solid fa-sliders"></i> Tone & Speed Controls
+            </button>
+
+            <!-- Speaker Voice Switcher Pill -->
+            <div class="pill-selector">
+                <button class="pill-btn active" id="btnFemale" onclick="setVoiceGender('woman')">
+                    <i class="fa-solid fa-person-dress"></i> Woman
+                </button>
+                <button class="pill-btn" id="btnMale" onclick="setVoiceGender('man')">
+                    <i class="fa-solid fa-person"></i> Man
+                </button>
+            </div>
+
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="provider-tag">GROQ (openai/gpt-oss-120b)</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="container">
+        
+        <!-- Collapsible Voice Frequency Tone Control Panel (Hidden/Held by default) -->
+        <div class="freq-panel" id="freqPanel">
+            <div class="freq-title">
+                <span><i class="fa-solid fa-sliders" style="color: var(--g-blue);"></i> Voice Tone Frequency & Speed Controls</span>
+                <button class="close-btn" onclick="toggleFreqPanel()" style="font-size: 0.9rem;"><i class="fa-solid fa-xmark"></i> Close</button>
+            </div>
+
+            <div class="freq-grid">
+                <!-- Tone Pitch Frequency Slider -->
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>🎙️ Sound Tone (Frequency Pitch)</span>
+                        <span class="val" id="pitchVal">1.00x (Natural Tone)</span>
+                    </div>
+                    <input type="range" id="pitchSlider" min="0.5" max="1.8" step="0.05" value="1.0" oninput="updateFreqControls()">
+                </div>
+
+                <!-- Speech Rate Speed Slider -->
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>⚡ Speech Speed (Talking Rate)</span>
+                        <span class="val" id="speedVal">1.00x (Normal Speed)</span>
+                    </div>
+                    <input type="range" id="speedSlider" min="0.6" max="2.0" step="0.1" value="1.0" oninput="updateFreqControls()">
+                </div>
+            </div>
+
+            <!-- Tone Frequency Presets -->
+            <div class="presets-row">
+                <span style="font-size: 0.8rem; color: var(--text-sub); margin-right: 4px;">Tone Presets:</span>
+                <button class="preset-chip" onclick="applyPreset(0.65, 0.95)">🎙️ Deep Bass Tone</button>
+                <button class="preset-chip" onclick="applyPreset(1.0, 1.0)">🔉 Natural Tone</button>
+                <button class="preset-chip" onclick="applyPreset(1.4, 1.05)">🔊 High Crisp Tone</button>
+                <button class="preset-chip" onclick="applyPreset(1.1, 1.5)">⚡ Turbo Speed</button>
+            </div>
+        </div>
+
+        <!-- Conversation Chat Bubbles -->
+        <div class="chat-container" id="chatHistory">
+            <div class="message-row assistant">
+                <div class="avatar avatar-assistant">
+                    <i class="fa-solid fa-sparkles" style="color: var(--g-blue);"></i>
+                </div>
+                <div class="bubble">
+                    <span class="voice-badge-tag" id="welcomeVoiceTag">👩 Woman Voice | ✨ Auto-Detect Language</span>
+                    Namaste! I am <b>Deva</b>. Type <b>"clear"</b> anytime to wipe all chat history!
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Visualizer & Mic Control -->
+        <div class="voice-section">
+            <div class="orb-wrapper" id="orbWrapper">
+                <div class="g-ring"></div>
+                <button class="mic-btn" id="micBtn">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+            </div>
+
+            <div class="wave-visualizer" id="waveVisualizer">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+
+            <div class="assistant-status" id="statusText">Say "open deva" or type "clear" to reset history</div>
+
+            <!-- Text Input Bar -->
+            <div class="input-bar">
+                <input type="text" id="textInput" placeholder="Type 'clear' to reset chat or ask a question..." onkeydown="if(event.key==='Enter') sendTextMessage()">
+                <button class="send-btn" onclick="sendTextMessage()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FLOATING GOOGLE ASSISTANT POP-UP WIDGET -->
+    <div class="widget-fab" id="widgetFab" onclick="toggleWidget()">
+        <div class="assistant-dots">
+            <div class="dot dot-blue"></div>
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+        </div>
+    </div>
+
+    <!-- FLOATING POPUP DRAWER -->
+    <div class="widget-popup" id="widgetPopup">
+        <div class="popup-header">
+            <div class="popup-title">
+                <div class="assistant-dots">
+                    <div class="dot dot-blue"></div>
+                    <div class="dot dot-red"></div>
+                    <div class="dot dot-yellow"></div>
+                    <div class="dot dot-green"></div>
+                </div>
+                Deva Assistant Pop-Up
+            </div>
+            <button class="close-btn" onclick="toggleWidget()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="popup-body">
+            <div class="orb-wrapper" id="popupOrb">
+                <div class="g-ring"></div>
+                <button class="mic-btn" id="popupMicBtn">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+            </div>
+            <div class="assistant-status" id="popupStatus">Tap mic or say 'open deva'</div>
+            <div class="popup-transcript" id="popupTranscript">"Namaste! Deva is ready."</div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const micBtn = document.getElementById('micBtn');
+        const orbWrapper = document.getElementById('orbWrapper');
+        const waveVisualizer = document.getElementById('waveVisualizer');
+        const statusText = document.getElementById('statusText');
+        const chatHistory = document.getElementById('chatHistory');
+        const textInput = document.getElementById('textInput');
+        const widgetPopup = document.getElementById('widgetPopup');
+        const popupMicBtn = document.getElementById('popupMicBtn');
+        const popupOrb = document.getElementById('popupOrb');
+        const popupStatus = document.getElementById('popupStatus');
+        const popupTranscript = document.getElementById('popupTranscript');
+
+        const pitchSlider = document.getElementById('pitchSlider');
+        const speedSlider = document.getElementById('speedSlider');
+        const freqPanel = document.getElementById('freqPanel');
+        const toggleFreqBtn = document.getElementById('toggleFreqBtn');
+
+        // State variables
+        let currentVoiceGender = localStorage.getItem('deva_voice_gender') || 'woman';
+        let currentPitch = parseFloat(localStorage.getItem('deva_pitch')) || 1.0;
+        let currentSpeed = parseFloat(localStorage.getItem('deva_speed')) || 1.0;
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        pitchSlider.value = currentPitch;
+        speedSlider.value = currentSpeed;
+
+        // Clear Chat History (Wipes UI bubbles and resets server memory)
+        async function clearChatHistory() {
+            try {
+                await fetch('/api/reset', { method: 'POST' });
+            } catch(e) {}
+
+            chatHistory.innerHTML = '';
+            addMessage('assistant', 'Conversation history cleared! Deva is ready for a new chat.');
+            popupTranscript.innerText = '"History cleared."';
+            updateStatus("Chat history cleared!", false);
+            speakText("Chat history cleared.", currentVoiceGender, currentPitch, currentSpeed);
+        }
+
+        // Toggle Frequency Panel
+        function toggleFreqPanel() {
+            freqPanel.classList.toggle('open');
+            toggleFreqBtn.classList.toggle('active', freqPanel.classList.contains('open'));
+        }
+
+        function updateFreqControls() {
+            currentPitch = parseFloat(pitchSlider.value);
+            currentSpeed = parseFloat(speedSlider.value);
+
+            localStorage.setItem('deva_pitch', currentPitch);
+            localStorage.setItem('deva_speed', currentSpeed);
+
+            let toneLabel = "Natural Tone";
+            if (currentPitch < 0.8) toneLabel = "Deep Bass Tone";
+            else if (currentPitch > 1.2) toneLabel = "High Crisp Tone";
+
+            document.getElementById('pitchVal').innerText = `${currentPitch.toFixed(2)}x (${toneLabel})`;
+            document.getElementById('speedVal').innerText = `${currentSpeed.toFixed(2)}x Speed`;
+
+            updateUIControls();
+        }
+
+        function applyPreset(pitch, speed) {
+            pitchSlider.value = pitch;
+            speedSlider.value = speed;
+            updateFreqControls();
+            speakText("Testing voice tone preset.", currentVoiceGender, currentPitch, currentSpeed);
+        }
+
+        function updateUIControls() {
+            const isFemale = currentVoiceGender === 'woman' || currentVoiceGender === 'female';
+            document.getElementById('btnFemale').classList.toggle('active', isFemale);
+            document.getElementById('btnMale').classList.toggle('active', !isFemale);
+
+            const voiceIcon = isFemale ? '👩 Woman Voice' : '👨 Man Voice';
+            const welcomeTag = document.getElementById('welcomeVoiceTag');
+            if (welcomeTag) welcomeTag.innerText = `${voiceIcon} | ✨ Auto-Detect Language | Tone: ${currentPitch.toFixed(2)}x`;
+        }
+
+        function setVoiceGender(gender) {
+            currentVoiceGender = gender;
+            localStorage.setItem('deva_voice_gender', gender);
+            updateUIControls();
+            const sample = gender === 'man' ? "Man voice selected." : "Woman voice selected.";
+            speakText(sample, gender, currentPitch, currentSpeed);
+        }
+
+        function openPopUpWidget() {
+            if (!widgetPopup.classList.contains('open')) {
+                widgetPopup.classList.add('open');
+            }
+        }
+
+        async function triggerOpenDeva() {
+            openPopUpWidget();
+            updateStatus("Opening Deva...", false);
+            try {
+                const response = await fetch('/api/wake-deva', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                addMessage('user', 'open deva');
+                addMessage('assistant', data.assistant_reply, currentVoiceGender, false);
+                popupTranscript.innerText = `"${data.assistant_reply}"`;
+                speakText(data.assistant_reply, currentVoiceGender, currentPitch, currentSpeed);
+                updateStatus("Deva is ready! Speak now.", false);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function toggleWidget() {
+            widgetPopup.classList.toggle('open');
+        }
+
+        async function toggleRecording(isPopUp = false) {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                startRecording(isPopUp);
+            }
+        }
+
+        micBtn.addEventListener('click', () => toggleRecording(false));
+        popupMicBtn.addEventListener('click', () => toggleRecording(true));
+
+        async function startRecording(isPopUp = false) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+                mediaRecorder.onstop = () => processRecordedAudio(isPopUp);
+
+                mediaRecorder.start();
+                isRecording = true;
+
+                setRecordingState(true);
+                updateStatus("Listening to speech...", isPopUp);
+
+            } catch (err) {
+                alert("Microphone access is required!");
+                console.error(err);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                setRecordingState(false);
+                updateStatus("Auto-detecting language & transcribing with Groq Whisper...", false);
+            }
+        }
+
+        function setRecordingState(active) {
+            if (active) {
+                micBtn.classList.add('recording');
+                popupMicBtn.classList.add('recording');
+                orbWrapper.classList.add('active');
+                popupOrb.classList.add('active');
+                waveVisualizer.classList.add('recording');
+            } else {
+                micBtn.classList.remove('recording');
+                popupMicBtn.classList.remove('recording');
+                orbWrapper.classList.remove('active');
+                popupOrb.classList.remove('active');
+                waveVisualizer.classList.remove('recording');
+            }
+        }
+
+        function updateStatus(text, isPopUp) {
+            statusText.innerText = text;
+            popupStatus.innerText = text;
+        }
+
+        async function processRecordedAudio(isPopUp) {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'voice_input.wav');
+            formData.append('voice_gender', currentVoiceGender);
+            formData.append('pitch', currentPitch);
+            formData.append('speed', currentSpeed);
+
+            try {
+                const response = await fetch('/api/process-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    const cleanText = data.user_text.toLowerCase().trim();
+                    if (cleanText === 'clear' || cleanText === 'clear history' || cleanText === 'clear chat' || cleanText === 'reset') {
+                        clearChatHistory();
+                        return;
+                    }
+
+                    const isKB = data.is_knowledge_base === true;
+                    addMessage('user', data.user_text);
+                    addMessage('assistant', data.assistant_reply, currentVoiceGender, isKB);
+                    popupTranscript.innerText = `"${data.assistant_reply}"`;
+                    
+                    if (!isKB) {
+                        speakText(data.assistant_reply, currentVoiceGender, currentPitch, currentSpeed);
+                    } else {
+                        window.speechSynthesis.cancel();
+                    }
+                    if (data.action && data.action.type === 'open_url' && data.action.url) {
+                        try { window.open(data.action.url, '_blank'); } catch(e){}
+                    }
+                    updateStatus("Say 'open deva' or tap mic", isPopUp);
+                } else {
+                    updateStatus(data.assistant_reply || "Please try speaking again", isPopUp);
+                }
+
+            } catch (error) {
+                console.error("API error:", error);
+                updateStatus("Error processing voice input", isPopUp);
+            }
+        }
+
+        async function sendTextMessage() {
+            const message = textInput.value.trim();
+            if (!message) return;
+
+            const cleanText = message.toLowerCase();
+            if (cleanText === 'clear' || cleanText === 'clear history' || cleanText === 'clear chat' || cleanText === 'reset') {
+                textInput.value = '';
+                clearChatHistory();
+                return;
+            }
+
+            addMessage('user', message);
+            textInput.value = '';
+
+            if (cleanText === 'open deva') {
+                triggerOpenDeva();
+                return;
+            }
+
+            updateStatus("Generating response via Groq AI...", false);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        voice_gender: currentVoiceGender,
+                        pitch: currentPitch,
+                        speed: currentSpeed
+                    })
+                });
+
+                const data = await response.json();
+                if (data.status === 'success') {
+                    const isKB = data.is_knowledge_base === true;
+                    addMessage('assistant', data.assistant_reply, currentVoiceGender, isKB);
+                    
+                    if (!isKB) {
+                        speakText(data.assistant_reply, currentVoiceGender, currentPitch, currentSpeed);
+                    } else {
+                        window.speechSynthesis.cancel();
+                    }
+                    if (data.action && data.action.type === 'open_url' && data.action.url) {
+                        try { window.open(data.action.url, '_blank'); } catch(e){}
+                    }
+                    updateStatus("Say 'open deva' or tap mic", false);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function addMessage(sender, text, gender = currentVoiceGender, isKnowledgeBase = false) {
+            const row = document.createElement('div');
+            row.className = `message-row ${sender}`;
+
+            const iconClass = sender === 'user' ? 'fa-user' : 'fa-sparkles';
+            const iconColor = sender === 'user' ? '#fff' : 'var(--g-blue)';
+            const avatarClass = sender === 'user' ? 'avatar-user' : 'avatar-assistant';
+
+            const isFemale = gender === 'woman' || gender === 'female';
+            const genderLabel = isFemale ? '👩 Woman Voice' : '👨 Man Voice';
+            
+            let badgeTag = '';
+            if (sender === 'assistant') {
+                if (isKnowledgeBase) {
+                    badgeTag = `<span class="secret-badge-tag"><i class="fa-solid fa-lock"></i> Confidential JSON Knowledge (Text Only - No Audio)</span>`;
+                } else {
+                    badgeTag = `<span class="voice-badge-tag">${genderLabel} | ✨ Auto-Detected Language</span>`;
+                }
+            }
+
+            row.innerHTML = `
+                <div class="avatar ${avatarClass}">
+                    <i class="fa-solid ${iconClass}" style="color: ${iconColor};"></i>
+                </div>
+                <div class="bubble">
+                    ${badgeTag}
+                    ${text}
+                </div>
+            `;
+
+            chatHistory.appendChild(row);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        // Web Speech Synthesis
+        function speakText(text, gender = currentVoiceGender, pitch = currentPitch, speed = currentSpeed) {
+            if (!('speechSynthesis' in window)) return;
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            const voices = window.speechSynthesis.getVoices();
+
+            const isMale = gender === 'man' || gender === 'male';
+            let chosenVoice = null;
+
+            if (voices && voices.length > 0) {
+                const isHindiText = /[\u0900-\u097F]/.test(text);
+                if (isHindiText) {
+                    for (let v of voices) {
+                        if (v.lang.includes('hi') || v.name.includes('Hindi') || v.name.includes('Kalpana') || v.name.includes('Hemant')) {
+                            chosenVoice = v;
+                            break;
+                        }
+                    }
+                }
+
+                if (!chosenVoice) {
+                    for (let v of voices) {
+                        const name = v.name.toLowerCase();
+                        if (isMale) {
+                            if (name.includes('david') || name.includes('male') || name.includes('guy') || name.includes('george') || name.includes('mark') || name.includes('hemant')) {
+                                chosenVoice = v;
+                                break;
+                            }
+                        } else {
+                            if (name.includes('zira') || name.includes('female') || name.includes('susan') || name.includes('hazel') || name.includes('samantha') || name.includes('kalpana')) {
+                                chosenVoice = v;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (!chosenVoice) chosenVoice = voices[0];
+                utterance.voice = chosenVoice;
+            }
+
+            let basePitch = isMale ? 0.85 : 1.15;
+            utterance.pitch = Math.max(0.5, Math.min(2.0, basePitch * pitch));
+            utterance.rate = Math.max(0.5, Math.min(2.0, speed));
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Continuous Background Wake Word Listener
+        function startBackgroundWakeWordListener() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return;
+
+            const recognizer = new SpeechRecognition();
+            recognizer.continuous = true;
+            recognizer.interimResults = true;
+            recognizer.lang = 'en-US';
+
+            recognizer.onresult = (event) => {
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcript = event.results[i][0].transcript.toLowerCase().trim();
+
+                    if (transcript === 'clear' || transcript === 'clear history' || transcript === 'clear chat') {
+                        recognizer.stop();
+                        clearChatHistory();
+                        break;
+                    }
+
+                    if (transcript.includes('open deva') || transcript.includes('hey deva') || transcript.includes('deva open') || transcript.includes('ok deva')) {
+                        recognizer.stop();
+                        triggerOpenDeva();
+                        break;
+                    }
+                }
+            };
+
+            recognizer.onend = () => {
+                if (!isRecording) {
+                    setTimeout(() => {
+                        try { recognizer.start(); } catch(e) {}
+                    }, 1000);
+                }
+            };
+
+            try { recognizer.start(); } catch(e) {}
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {};
+        }
+
+        async function fetchStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                document.getElementById('provider-tag').innerText = `${data.provider} (${data.llm_model})`;
+            } catch (e) {}
+        }
+
+        updateFreqControls();
+        fetchStatus();
+        startBackgroundWakeWordListener();
+
+        // Auto trigger Deva popup if launched with wake=true
+        if (window.location.search.includes('wake=true')) {
+            setTimeout(() => {
+                triggerOpenDeva();
+            }, 400);
+        }
+    </script>
+</body>
+</html>

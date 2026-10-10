@@ -1,0 +1,10 @@
+{
+  "stack": "MERN Stack, WebRTC, Tailwind CSS",
+  "langs": "Java, Python, JavaScript, SQL",
+  "vcs": "Git CLI, GitHub",
+  "infra": "Docker, Redis, Kafka",
+  "city": "Your City Here",
+  "goal": "Full-Stack Software Engineer",
+  "wifi_password": "ExamplePassword123",
+  "meeting_link": "https://meet.google.com/xyz-abc-def"
+}

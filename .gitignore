@@ -1,0 +1,79 @@
+# ==========================================
+# Deva Voice Assistant - Git Ignore
+# ==========================================
+
+# 1. Environment Secrets & API Keys (DO NOT COMMIT)
+.env
+.env.local
+.env.*.local
+*.env
+
+# 2. Confidential Knowledge Base (Protects passwords & team credentials)
+knowledge_base.json
+
+# 3. Audio & Recorded Media Files
+*.wav
+*.mp3
+*.m4a
+*.ogg
+input_audio.wav
+background_wake_chunk.wav
+web_input_audio.wav
+
+# 4. Python Bytecode & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 5. Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# 6. IDEs & Code Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# 7. Operating System Cache
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 8. Temporary & Log Files
+*.log
+*.sqlite
+*.sqlite3
+temp/
+tmp/
+scratch/
