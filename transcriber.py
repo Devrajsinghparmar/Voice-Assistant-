@@ -12,14 +12,25 @@ class Transcriber:
     def __init__(self):
         self.provider = config.API_PROVIDER
         self.client = None
+        self._current_key = None
+        self._get_client()
 
-        if config.validate_api_key():
-            if self.provider == "groq":
-                from groq import Groq
-                self.client = Groq(api_key=config.GROQ_API_KEY)
-            else:
-                from openai import OpenAI
-                self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+    def _get_client(self):
+        """Dynamically retrieves or initializes the Groq/OpenAI client with active API key."""
+        api_key = os.getenv("GROQ_API_KEY", "").strip() or config.GROQ_API_KEY
+        if api_key and api_key != "your_groq_api_key_here":
+            if self.client is None or self._current_key != api_key:
+                try:
+                    if self.provider == "groq":
+                        from groq import Groq
+                        self.client = Groq(api_key=api_key)
+                    else:
+                        from openai import OpenAI
+                        self.client = OpenAI(api_key=api_key)
+                    self._current_key = api_key
+                except Exception as e:
+                    print(f"[Transcriber Init Warning] Could not init client: {e}")
+        return self.client
 
     def transcribe(self, audio_file_path: str, language: str = None) -> str:
         """
@@ -35,9 +46,10 @@ class Transcriber:
         if os.path.getsize(audio_file_path) < 1000:
             return ""
 
-        if not self.client:
+        client = self._get_client()
+        if not client:
             raise ValueError(
-                f"API Key for provider '{self.provider.upper()}' is missing or invalid."
+                f"API Key for provider '{self.provider.upper()}' is missing or invalid. Please configure GROQ_API_KEY in Vercel Environment Variables."
             )
 
         try:
@@ -50,22 +62,24 @@ class Transcriber:
                         "model": stt_model,
                         "prompt": "Automatically detect speech language (English, Hindi, or Hinglish) and transcribe accurately.",
                         "response_format": "json",
+                        "timeout": 25.0,
                     }
                     if language:
                         kwargs["language"] = language
 
-                    transcript_response = self.client.audio.transcriptions.create(**kwargs)
+                    transcript_response = client.audio.transcriptions.create(**kwargs)
                     text = transcript_response.text.strip()
                 else:
                     kwargs = {
                         "model": stt_model,
                         "file": audio_file,
                         "prompt": "Automatically detect speech language (English, Hindi, or Hinglish) and transcribe accurately.",
+                        "timeout": 25.0,
                     }
                     if language:
                         kwargs["language"] = language
 
-                    transcript_response = self.client.audio.transcriptions.create(**kwargs)
+                    transcript_response = client.audio.transcriptions.create(**kwargs)
                     text = transcript_response.text.strip()
 
             return text

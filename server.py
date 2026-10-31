@@ -60,6 +60,8 @@ def index():
 @app.route("/api/status", methods=["GET"])
 def get_status():
     """Returns system status and current configuration."""
+    api_key = os.getenv("GROQ_API_KEY", "").strip() or config.GROQ_API_KEY
+    has_valid_key = bool(api_key and api_key != "your_groq_api_key_here")
     return jsonify({
         "assistant_name": config.ASSISTANT_NAME,
         "provider": config.API_PROVIDER.upper(),
@@ -71,7 +73,7 @@ def get_status():
         "voice_rate": tts.rate,
         "language": "auto-detect",
         "knowledge_count": len(km.knowledge),
-        "api_key_configured": config.validate_api_key(),
+        "api_key_configured": has_valid_key,
         "memory_count": len(assistant.conversation_history) - 1
     })
 

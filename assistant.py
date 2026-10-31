@@ -6,6 +6,7 @@ system app execution (Camera, Notepad, Calc, Explorer, etc.),
 browser tabs, and flags sensitive JSON Knowledge Base responses for text-only rendering.
 """
 
+import os
 from typing import List, Dict, Tuple, Optional
 from config import config
 from knowledge_manager import KnowledgeManager
@@ -18,17 +19,28 @@ class VoiceAssistant:
         self.km = KnowledgeManager()
         self.system_prompt = config.get_system_prompt(self.km.get_knowledge_context())
         self.client = None
-
-        if config.validate_api_key():
-            if self.provider == "groq":
-                from groq import Groq
-                self.client = Groq(api_key=config.GROQ_API_KEY)
-            else:
-                from openai import OpenAI
-                self.client = OpenAI(api_key=config.OPENAI_API_KEY)
+        self._current_key = None
+        self._get_client()
 
         self.conversation_history: List[Dict[str, str]] = []
         self.reset_conversation()
+
+    def _get_client(self):
+        """Dynamically retrieves or initializes the Groq/OpenAI client with active API key."""
+        api_key = os.getenv("GROQ_API_KEY", "").strip() or config.GROQ_API_KEY
+        if api_key and api_key != "your_groq_api_key_here":
+            if self.client is None or self._current_key != api_key:
+                try:
+                    if self.provider == "groq":
+                        from groq import Groq
+                        self.client = Groq(api_key=api_key)
+                    else:
+                        from openai import OpenAI
+                        self.client = OpenAI(api_key=api_key)
+                    self._current_key = api_key
+                except Exception as e:
+                    print(f"[Assistant Init Warning] Could not init client: {e}")
+        return self.client
 
     def refresh_knowledge(self):
         """Reloads knowledge_base.json data into prompt context."""
@@ -78,19 +90,21 @@ class VoiceAssistant:
             self.conversation_history.append({"role": "assistant", "content": direct_match})
             return (direct_match, True, None)  # Flagged as JSON Knowledge Base -> Text ONLY (No speech)
 
-        if not self.client:
-            return (f"API key for '{self.provider.upper()}' is missing or invalid.", False, None)
+        client = self._get_client()
+        if not client:
+            return (f"API key for '{self.provider.upper()}' is missing or invalid. Please add GROQ_API_KEY under Vercel Project Settings -> Environment Variables, then click Redeploy.", False, None)
 
         self.refresh_knowledge()
         self.conversation_history.append({"role": "user", "content": user_text})
 
         try:
             model_name = config.LLM_MODEL
-            response = self.client.chat.completions.create(
+            response = client.chat.completions.create(
                 model=model_name,
                 messages=self.conversation_history,
                 max_tokens=300,
                 temperature=0.7,
+                timeout=25.0,
             )
 
             assistant_reply = response.choices[0].message.content.strip()
