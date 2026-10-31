@@ -6,7 +6,12 @@ Supports dynamic voice frequency tone (pitch), speech speed (rate), and Man/Woma
 
 import os
 import sys
-import pyttsx3
+
+try:
+    import pyttsx3
+except Exception:
+    pyttsx3 = None
+
 from config import config
 
 # Ensure UTF-8 stdout encoding on Windows
@@ -31,13 +36,15 @@ class TTSEngine:
         self.pitch = pitch
         self.volume = volume
         self.voice_gender = voice_gender.lower()
+        self.pyttsx3_engine = None
 
-        try:
-            self.pyttsx3_engine = pyttsx3.init()
-            self.set_voice_gender(self.voice_gender)
-        except Exception as e:
-            print(f"[TTS Warning] Could not initialize pyttsx3 engine: {e}")
-            self.pyttsx3_engine = None
+        if pyttsx3:
+            try:
+                self.pyttsx3_engine = pyttsx3.init()
+                self.set_voice_gender(self.voice_gender)
+            except Exception as e:
+                print(f"[TTS Warning] Could not initialize pyttsx3 engine: {e}")
+                self.pyttsx3_engine = None
 
     def set_voice_gender(self, gender: str) -> str:
         """Sets voice model to Male ('man') or Female ('woman')."""

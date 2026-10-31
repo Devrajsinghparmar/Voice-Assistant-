@@ -77,3 +77,4 @@ $RECYCLE.BIN/
 temp/
 tmp/
 scratch/
+.vercel/

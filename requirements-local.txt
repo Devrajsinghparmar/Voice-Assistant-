@@ -1,0 +1,10 @@
+# ==========================================
+# Optional Local Desktop Assistant Dependencies
+# Install if you want to use local microphone background listener or CLI:
+# pip install -r requirements-local.txt
+# ==========================================
+sounddevice>=0.4.6
+pyttsx3>=2.90
+scipy>=1.10.0
+numpy>=1.24.0
+colorama>=0.4.6

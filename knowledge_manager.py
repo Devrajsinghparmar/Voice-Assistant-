@@ -10,23 +10,35 @@ from typing import Dict, Optional
 
 
 class KnowledgeManager:
-    def __init__(self, json_file: str = "knowledge_base.json"):
-        self.json_file = json_file
+    def __init__(self, json_file: str = None):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        if json_file is None:
+            self.json_file = os.path.join(base_dir, "knowledge_base.json")
+            self.example_file = os.path.join(base_dir, "knowledge_base.example.json")
+        else:
+            self.json_file = json_file
+            self.example_file = None
+
         self.knowledge: Dict[str, str] = {}
         self.load_knowledge()
 
     def load_knowledge(self) -> Dict[str, str]:
-        """Loads Q&A data from knowledge_base.json."""
+        """Loads Q&A data from knowledge_base.json or fallback example."""
+        target_file = None
         if os.path.exists(self.json_file):
+            target_file = self.json_file
+        elif self.example_file and os.path.exists(self.example_file):
+            target_file = self.example_file
+
+        if target_file:
             try:
-                with open(self.json_file, "r", encoding="utf-8") as f:
+                with open(target_file, "r", encoding="utf-8") as f:
                     self.knowledge = json.load(f)
             except Exception as e:
-                print(f"[KnowledgeManager Error] Failed to load {self.json_file}: {e}")
+                print(f"[KnowledgeManager Error] Failed to load {target_file}: {e}")
                 self.knowledge = {}
         else:
             self.knowledge = {}
-            self.save_knowledge()
         return self.knowledge
 
     def save_knowledge(self) -> bool:
@@ -36,7 +48,8 @@ class KnowledgeManager:
                 json.dump(self.knowledge, f, indent=2, ensure_ascii=False)
             return True
         except Exception as e:
-            print(f"[KnowledgeManager Error] Failed to save {self.json_file}: {e}")
+            # Handles read-only environments (such as Vercel serverless)
+            print(f"[KnowledgeManager Notice] Cannot write to {self.json_file} (Read-only environment or error): {e}")
             return False
 
     def add_entry(self, question: str, answer: str) -> bool:

@@ -11,6 +11,14 @@ import webbrowser
 from typing import Tuple, Dict, Optional
 
 
+def _safe_open_url(url: str):
+    """Safely opens URL in desktop browser if running locally."""
+    try:
+        webbrowser.open(url)
+    except Exception:
+        pass
+
+
 class SystemActionsManager:
     """Detects and executes system commands like camera, apps, and browser tabs."""
 
@@ -93,46 +101,46 @@ class SystemActionsManager:
         # 9. Web Search & Browser Tabs
         if any(cmd in text for cmd in ["open new tab", "open tab", "new tab"]):
             url = "https://www.google.com"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, "Opening a new browser tab...", {"type": "open_url", "url": url}
 
         if "open youtube" in text or "start youtube" in text:
             url = "https://www.youtube.com"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, "Opening YouTube...", {"type": "open_url", "url": url}
 
         if "open google" in text:
             url = "https://www.google.com"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, "Opening Google...", {"type": "open_url", "url": url}
 
         if "open whatsapp" in text:
             url = "https://web.whatsapp.com"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, "Opening WhatsApp Web...", {"type": "open_url", "url": url}
 
         if "open github" in text:
             url = "https://github.com"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, "Opening GitHub...", {"type": "open_url", "url": url}
 
         if "open gmail" in text or "open mail" in text:
             url = "https://mail.google.com"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, "Opening Gmail...", {"type": "open_url", "url": url}
 
         # Search on Youtube
         if "youtube" in text and ("search" in text or "play" in text or "find" in text):
             query = text.replace("search youtube for ", "").replace("search on youtube for ", "").replace("search on youtube ", "").replace("search youtube ", "").replace("play ", "").replace("on youtube", "").replace("search ", "").strip()
             url = f"https://www.youtube.com/results?search_query={query}"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, f"Searching YouTube for '{query}'...", {"type": "open_url", "url": url}
 
         # General Google Search
         if "search" in text or text.startswith("google ") or text.startswith("find "):
             query = text.replace("search google for ", "").replace("search on google for ", "").replace("search on google ", "").replace("search google ", "").replace("google search ", "").replace("search for ", "").replace("search ", "").replace("google ", "").replace("find ", "").replace(" on google", "").strip()
             url = f"https://www.google.com/search?q={query}"
-            webbrowser.open(url)
+            _safe_open_url(url)
             return True, f"Searching Google for '{query}'...", {"type": "open_url", "url": url}
 
         # Dynamic website opening e.g., "open instagram", "open amazon.in", "open facebook"
@@ -140,7 +148,7 @@ class SystemActionsManager:
             target = text.replace("open ", "").strip()
             if target and target not in ["deva", "menu", "history", "chat"]:
                 url = target if target.startswith("http") else "https://" + (target if "." in target else f"www.{target}.com")
-                webbrowser.open(url)
+                _safe_open_url(url)
                 return True, f"Opening {target} in browser...", {"type": "open_url", "url": url}
 
         return False, "", None

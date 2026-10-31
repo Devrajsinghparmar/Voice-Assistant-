@@ -62,7 +62,7 @@ You can also edit `knowledge_base.json` in any text editor:
 
 ---
 
-## 🚀 How to Run
+## 🚀 How to Run Locally
 
 Start the web server:
 ```bash
@@ -73,3 +73,33 @@ Or use the launcher:
 python main.py
 ```
 *(Select Option `[6]`)*
+
+---
+
+## ☁️ Deploying to Vercel (Host in the Cloud)
+
+Deva is configured for **1-click deployment to Vercel**:
+
+### Step 1: Push Code to GitHub
+```bash
+git add .
+git commit -m "Configure Vercel serverless deployment"
+git push origin main
+```
+
+### Step 2: Import into Vercel
+1. Log in to [Vercel](https://vercel.com) and click **"Add New..." -> "Project"**.
+2. Select your GitHub repository (`G_AI` / `Deva`).
+3. Vercel will automatically detect `vercel.json` and `api/index.py`.
+
+### Step 3: Set Environment Variables in Vercel
+In the project settings on Vercel (before clicking Deploy), under **Environment Variables**, add:
+- `GROQ_API_KEY`: Your Groq API key (`gsk_...`)
+- `API_PROVIDER`: `groq` (optional, defaults to `groq`)
+- `LLM_MODEL`: `openai/gpt-oss-120b` (optional)
+- `STT_MODEL`: `whisper-large-v3-turbo` (optional)
+
+### Step 4: Deploy!
+Click **Deploy**. In under a minute, your assistant will be live with a public HTTPS URL (e.g. `https://your-deva-app.vercel.app`) accessible from any laptop or mobile phone!
+- **Voice recording & playback:** Handled directly in the client browser using Web Audio and Web Speech API.
+- **Fast STT & AI:** Powered by cloud Groq Whisper & Groq LLM serverless endpoints.

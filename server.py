@@ -7,6 +7,7 @@ system-wide background wake word listener, and flags JSON Knowledge Base respons
 
 import os
 import sys
+import uuid
 import tempfile
 import threading
 from flask import Flask, request, jsonify, send_from_directory
@@ -17,7 +18,6 @@ from transcriber import Transcriber
 from assistant import VoiceAssistant
 from tts_engine import TTSEngine
 from knowledge_manager import KnowledgeManager
-from deva_background_listener import BackgroundWakeListener
 
 # Ensure UTF-8 stdout encoding on Windows
 if hasattr(sys.stdout, "reconfigure"):
@@ -26,7 +26,10 @@ if hasattr(sys.stdout, "reconfigure"):
     except Exception:
         pass
 
-app = Flask(__name__, static_folder="static")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="/static")
 CORS(app)
 
 # Initialize core services
@@ -37,8 +40,9 @@ km = KnowledgeManager()
 
 
 def start_background_wake_service():
-    """Runs BackgroundWakeListener in a background daemon thread."""
+    """Runs BackgroundWakeListener in a background daemon thread (local only)."""
     try:
+        from deva_background_listener import BackgroundWakeListener
         listener = BackgroundWakeListener()
         listener.listen_loop()
     except Exception as e:
@@ -48,7 +52,7 @@ def start_background_wake_service():
 @app.route("/")
 def index():
     """Serves the Deva Google Assistant web interface."""
-    return send_from_directory("static", "index.html")
+    return send_from_directory(STATIC_DIR, "index.html")
 
 
 @app.route("/api/status", methods=["GET"])
@@ -124,7 +128,7 @@ def process_audio():
     wpm_rate = int(175 * speed)
 
     temp_dir = tempfile.gettempdir()
-    temp_path = os.path.join(temp_dir, "web_input_audio.wav")
+    temp_path = os.path.join(temp_dir, f"web_input_{uuid.uuid4().hex}.wav")
     audio_file.save(temp_path)
 
     try:
@@ -141,9 +145,12 @@ def process_audio():
 
         assistant_reply, is_kb, action = assistant.get_response_info(user_text)
 
-        # Only speak out loud if NOT from confidential JSON Knowledge Base
+        # Only speak out loud locally if NOT from confidential JSON Knowledge Base
         if not is_kb and request.form.get("play_local_tts", "false").lower() == "true":
-            tts.speak(assistant_reply, gender=voice_gender, rate=wpm_rate, pitch=pitch)
+            try:
+                tts.speak(assistant_reply, gender=voice_gender, rate=wpm_rate, pitch=pitch)
+            except Exception:
+                pass
 
         return jsonify({
             "user_text": user_text,
