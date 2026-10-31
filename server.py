@@ -50,6 +50,8 @@ def start_background_wake_service():
 
 
 @app.route("/")
+@app.route("/index")
+@app.route("/api/index")
 def index():
     """Serves the Deva Google Assistant web interface."""
     return send_from_directory(STATIC_DIR, "index.html")
@@ -220,6 +222,15 @@ def reset_memory():
     """Resets conversation context history."""
     assistant.reset_conversation()
     return jsonify({"message": "Conversation memory reset successfully", "status": "success"})
+
+
+@app.route("/<path:path>", methods=["GET"])
+def catch_all(path):
+    """Fallback handler to ensure static assets or SPA views never 404."""
+    file_path = os.path.join(STATIC_DIR, path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return send_from_directory(STATIC_DIR, path)
+    return send_from_directory(STATIC_DIR, "index.html")
 
 
 def start_server(port=5000, host="127.0.0.1", debug=False):
